@@ -1,0 +1,27 @@
+{
+  "name": "HelpScout Modal Extension",
+  "version": "1.0",
+  "author": "Chris Eggleston",
+  "manifest_version": 3,
+  "permissions": ["downloads", "activeTab", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://secure.helpscout.net/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["scripts/helpscout/mailbox-loader.js"],
+      "matches": ["https://secure.helpscout.net/*"]
+    }
+  ],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
