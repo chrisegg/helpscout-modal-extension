@@ -1,9 +1,9 @@
 # Helpscout Modal Extension
-This extension for Chrome and possibly Firefox browsers adds support for opening file attachments in a modal.
+This extension for Chrome and Firefox browsers adds support for opening file attachments in a modal.
 This extension has been tested for multiple Chrome-based browsers (i.e. Chrome, Arc, Brave) but not for Firefox.
 **Use at your own risk**
 
-Installation Instructions:
+Installation Instructions (Chrome Based Browsers):
 
 Step 1: Download and Prepare Extension Files
 
