@@ -101,7 +101,7 @@
             overflow: "hidden"
         });
 
-        // Modal header with dark background color for visibility in both light and dark modes
+        // Modal header
         const header = document.createElement("div");
         setStyles(header, {
             display: "flex",
@@ -195,9 +195,9 @@
 
     // Function to highlight button temporarily using outline
     const highlightButton = (button) => {
-        button.style.outline = "2px solid blue"; // Use outline instead of border
+        button.style.outline = "2px solid blue";
         setTimeout(() => {
-            button.style.outline = "none"; // Remove outline after 2 seconds
+            button.style.outline = "none";
         }, 2000);
     };
 
@@ -206,10 +206,12 @@
         const anchor = event.target.closest("a");
         if (anchor) {
             const href = anchor.getAttribute("href");
-            if (href && href.includes("/attachments/") && href.includes("/file")) {
+            const originalFilename = anchor.getAttribute("title");
+
+            // Ensure only .txt and .json files open in modal
+            if (originalFilename && (originalFilename.endsWith(".txt") || originalFilename.endsWith(".json"))) {
                 event.preventDefault();
                 const fullDownloadUrl = window.location.origin + href;
-                const originalFilename = anchor.getAttribute("title");
 
                 fetch(fullDownloadUrl)
                     .then(response => {
