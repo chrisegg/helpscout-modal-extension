@@ -4,6 +4,7 @@
     const MODAL_WIDTH = "90%";
     const MODAL_MAX_WIDTH = "800px";
     const HEADER_TITLE = "File Preview";
+    const REPLY_BOX_EXPAND_FEATURE_KEY = "replyBoxExpandEnabled";
 
     // Function to escape HTML characters
     const escapeHtml = (text) => {
@@ -76,7 +77,7 @@
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            zIndex: "1000",
+            zIndex: "5000",
             fontFamily: "Arial, sans-serif"
         });
 
@@ -183,14 +184,22 @@
         modal.appendChild(modalContent);
         document.body.appendChild(modal);
 
-        // ESC key close
+// ESC key close
         const escCloseHandler = (e) => {
             if (e.key === "Escape") {
-                modal.remove();
-                document.removeEventListener("keydown", escCloseHandler);
+                const customModal = document.getElementById(MODAL_ID); // Check for your custom modal
+                if (customModal) {
+                    e.preventDefault(); // Prevent default ESC behavior
+                    e.stopPropagation(); // Stop the event from reaching HelpScout's listener
+                    customModal.remove(); // Remove your custom modal
+                    document.removeEventListener("keydown", escCloseHandler); // Cleanup the event listener
+                    console.log("Custom modal closed.");
+                }
             }
         };
-        document.addEventListener("keydown", escCloseHandler);
+        
+        // Add the ESC key listener
+        document.addEventListener("keydown", escCloseHandler, { capture: true });
     };
 
     // Function to highlight button temporarily using outline
@@ -200,6 +209,30 @@
             button.style.outline = "none";
         }, 2000);
     };
+
+    // Function to expand the reply box
+    const expandReplyBox = () => {
+        const expandButton = document.querySelector('[data-testid="expand-button"]');
+        if (expandButton) {
+            console.log("Expand button found. Clicking to expand reply box.");
+            expandButton.click();
+        } else {
+            console.warn("Expand button for reply box not found.");
+        }
+    };
+
+    // Listen for the Reply button click if the feature is enabled
+    if (localStorage.getItem(REPLY_BOX_EXPAND_FEATURE_KEY) === "false") {
+        document.addEventListener("click", (event) => {
+            const replyButton = event.target.closest("button[data-testid='reply-button']");
+            if (replyButton) {
+                console.log("Reply button clicked.");
+                setTimeout(() => {
+                    expandReplyBox(); // Attempt to expand the reply box
+                }, 200); // Slight delay to ensure DOM is updated
+            }
+        });
+    }
 
     // Intercept clicks on file links and fetch content
     document.addEventListener("click", (event) => {
@@ -228,4 +261,6 @@
             }
         }
     });
+
+    console.log("Script initialized and listening for reply button clicks.");
 })();
