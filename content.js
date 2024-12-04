@@ -209,7 +209,9 @@
             button.style.outline = "none";
         }, 2000);
     };
-
+/*
+    console.log("Script initialized and listening for reply button clicks.");
+    
     // Function to expand the reply box
     const expandReplyBox = () => {
         const expandButton = document.querySelector('[data-testid="expand-button"]');
@@ -220,20 +222,18 @@
             console.warn("Expand button for reply box not found.");
         }
     };
-
-    // Listen for the Reply button click if the feature is enabled
-    if (localStorage.getItem(REPLY_BOX_EXPAND_FEATURE_KEY) === "false") {
-        document.addEventListener("click", (event) => {
-            const replyButton = event.target.closest("button[data-testid='reply-button']");
-            if (replyButton) {
-                console.log("Reply button clicked.");
-                setTimeout(() => {
-                    expandReplyBox(); // Attempt to expand the reply box
-                }, 200); // Slight delay to ensure DOM is updated
-            }
-        });
-    }
-
+    
+    // Listen for the Reply button click
+    document.addEventListener("click", (event) => {
+        const replyButton = event.target.closest("button[data-testid='reply-button']");
+        if (replyButton) {
+            console.log("Reply button clicked.");
+            setTimeout(() => {
+                expandReplyBox(); // Attempt to expand the reply box
+            }, 200); // Slight delay to ensure DOM is updated
+        }
+    });
+*/
     // Intercept clicks on file links and fetch content
     document.addEventListener("click", (event) => {
         const anchor = event.target.closest("a");
@@ -262,5 +262,4 @@
         }
     });
 
-    console.log("Script initialized and listening for reply button clicks.");
 })();
