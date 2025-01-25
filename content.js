@@ -4,11 +4,11 @@
     const MODAL_WIDTH = "90%";
     const MODAL_MAX_WIDTH = "800px";
     const HEADER_TITLE = "File Preview";
-    const REPLY_BOX_EXPAND_FEATURE_KEY = "replyBoxExpandEnabled";
+
 
     // Function to escape HTML characters
     const escapeHtml = (text) => {
-        const div = document.createElement('div');
+        const div = document.createElement("div");
         div.appendChild(document.createTextNode(text));
         return div.innerHTML;
     };
@@ -30,6 +30,14 @@
         }
     };
 
+    // Function to format CSV for better readability
+    const formatCsv = (csv) => {
+        return csv
+            .split("\n")
+            .map(row => row.split(",").join(" | "))
+            .join("\n");
+    };
+
     // Utility function to set styles
     const setStyles = (element, styles) => {
         Object.assign(element.style, styles);
@@ -46,7 +54,7 @@
             borderRadius: "4px",
             background: "transparent",
             fontSize: "14px",
-            cursor: "pointer"
+            cursor: "pointer",
         });
         button.onclick = onClick;
         return button;
@@ -54,11 +62,15 @@
 
     // Function to create and show the custom modal
     const createModal = (content, downloadUrl, originalFilename) => {
-        const isJson = content.trim().startsWith("{") && content.trim().endsWith("}") ||
-                       content.trim().startsWith("[") && content.trim().endsWith("]");
-        
+        const isJson = content.trim().startsWith("{") && content.trim().endsWith("}");
+        const isCsv = originalFilename.endsWith(".csv");
+
         const originalContent = content;
-        const displayContent = isJson ? prettyPrintJson(content) : makeLinksClickable(content);
+        const displayContent = isJson
+            ? prettyPrintJson(content)
+            : isCsv
+            ? formatCsv(content)
+            : makeLinksClickable(escapeHtml(content));
 
         // Remove existing modal if present
         const existingModal = document.getElementById(MODAL_ID);
@@ -78,7 +90,7 @@
             alignItems: "center",
             justifyContent: "center",
             zIndex: "5000",
-            fontFamily: "Arial, sans-serif"
+            fontFamily: "Arial, sans-serif",
         });
 
         // Click outside to close
@@ -86,7 +98,7 @@
             if (e.target === modal) modal.remove();
         });
 
-        // Modal content box with dark mode styling
+        // Modal content box
         const modalContent = document.createElement("div");
         setStyles(modalContent, {
             backgroundColor: "#000",
@@ -99,7 +111,7 @@
             display: "flex",
             flexDirection: "column",
             maxHeight: MODAL_MAX_HEIGHT,
-            overflow: "hidden"
+            overflow: "hidden",
         });
 
         // Modal header
@@ -110,9 +122,9 @@
             alignItems: "center",
             padding: "10px 20px",
             backgroundColor: "#fff",
-            color: "#fff",
+            color: "#000",
             borderTopLeftRadius: "8px",
-            borderTopRightRadius: "8px"
+            borderTopRightRadius: "8px",
         });
 
         const title = document.createElement("h2");
@@ -126,7 +138,6 @@
         setStyles(buttonContainer, {
             display: "flex",
             gap: "10px",
-            padding: "10px"
         });
 
         // Copy button
@@ -148,7 +159,7 @@
                 })
                 .then(blob => {
                     const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
+                    const link = document.createElement("a");
                     link.href = url;
                     link.download = originalFilename;
                     document.body.appendChild(link);
@@ -159,46 +170,37 @@
                 .catch(error => console.error("Error fetching the file:", error));
         });
 
-        // Append buttons to container
+        // Append buttons to header
         buttonContainer.appendChild(copyButton);
         buttonContainer.appendChild(downloadButton);
-
-        // Assemble header and content
         header.appendChild(buttonContainer);
+
         const contentContainer = document.createElement("pre");
         setStyles(contentContainer, {
             overflowY: "auto",
             flex: "1",
+            padding: "20px",
             whiteSpace: "pre-wrap",
             wordWrap: "break-word",
             fontSize: "14px",
             color: "#fff",
-            padding: "20px",
-            margin: "0"
         });
         contentContainer.innerHTML = displayContent;
 
-        // Assemble modal
         modalContent.appendChild(header);
         modalContent.appendChild(contentContainer);
         modal.appendChild(modalContent);
         document.body.appendChild(modal);
 
-// ESC key close
         const escCloseHandler = (e) => {
             if (e.key === "Escape") {
-                const customModal = document.getElementById(MODAL_ID); // Check for your custom modal
-                if (customModal) {
-                    e.preventDefault(); // Prevent default ESC behavior
-                    e.stopPropagation(); // Stop the event from reaching HelpScout's listener
-                    customModal.remove(); // Remove your custom modal
-                    document.removeEventListener("keydown", escCloseHandler); // Cleanup the event listener
-                    console.log("Custom modal closed.");
-                }
+                e.preventDefault();
+                e.stopPropagation();
+                modal.remove();
+                document.removeEventListener("keydown", escCloseHandler);
             }
         };
-        
-        // Add the ESC key listener
+
         document.addEventListener("keydown", escCloseHandler, { capture: true });
     };
 
@@ -209,31 +211,65 @@
             button.style.outline = "none";
         }, 2000);
     };
-/*
-    console.log("Script initialized and listening for reply button clicks.");
+
+(() => {
+        console.log("Script initialized and listening for reply button clicks.");
     
-    // Function to expand the reply box
-    const expandReplyBox = () => {
-        const expandButton = document.querySelector('[data-testid="expand-button"]');
-        if (expandButton) {
-            console.log("Expand button found. Clicking to expand reply box.");
-            expandButton.click();
-        } else {
-            console.warn("Expand button for reply box not found.");
-        }
-    };
+        let isReplyBoxExpandEnabled = false;
     
-    // Listen for the Reply button click
-    document.addEventListener("click", (event) => {
-        const replyButton = event.target.closest("button[data-testid='reply-button']");
-        if (replyButton) {
-            console.log("Reply button clicked.");
-            setTimeout(() => {
-                expandReplyBox(); // Attempt to expand the reply box
-            }, 200); // Slight delay to ensure DOM is updated
-        }
-    });
-*/
+        // Function to expand the reply box
+        const expandReplyBox = () => {
+            const expandButton = document.querySelector('[data-testid="expand-button"]');
+            if (expandButton) {
+                console.log("Expand button found. Clicking to expand reply box.");
+                expandButton.click();
+            } else {
+                console.warn("Expand button for reply box not found.");
+            }
+        };
+    
+        // Add listener for the Reply button click
+        const initializeReplyButtonListener = () => {
+            document.addEventListener("click", (event) => {
+                if (!isReplyBoxExpandEnabled) return;
+    
+                const replyButton = event.target.closest("button[data-testid='reply-button']");
+                if (replyButton) {
+                    console.log("Reply button clicked.");
+                    setTimeout(() => {
+                        expandReplyBox(); // Attempt to expand the reply box
+                    }, 200); // Slight delay to ensure DOM is updated
+                }
+            });
+        };
+    
+        // Listen for storage changes to toggle the feature in real-time
+        chrome.storage.onChanged.addListener((changes) => {
+            if (changes.autoExpandReplyBox) {
+                isReplyBoxExpandEnabled = changes.autoExpandReplyBox.newValue;
+                console.log(
+                    `Auto-Expand Reply Box feature is now ${
+                        isReplyBoxExpandEnabled ? "enabled" : "disabled"
+                    }.`
+                );
+            }
+        });
+    
+        // Load initial user settings
+        chrome.storage.sync.get({ autoExpandReplyBox: true }, (data) => {
+            isReplyBoxExpandEnabled = data.autoExpandReplyBox;
+            console.log(
+                `Auto-Expand Reply Box feature is ${
+                    isReplyBoxExpandEnabled ? "enabled" : "disabled"
+                }.`
+            );
+    
+            // Initialize listener
+            initializeReplyButtonListener();
+        });
+    })();
+    
+    
     // Intercept clicks on file links and fetch content
     document.addEventListener("click", (event) => {
         const anchor = event.target.closest("a");
@@ -241,8 +277,11 @@
             const href = anchor.getAttribute("href");
             const originalFilename = anchor.getAttribute("title");
 
-            // Ensure only .txt and .json files open in modal
-            if (originalFilename && (originalFilename.endsWith(".txt") || originalFilename.endsWith(".json"))) {
+            // Ensure only .txt, .json, and .csv files open in modal
+            if (originalFilename && (
+                originalFilename.endsWith(".txt") || 
+                originalFilename.endsWith(".json") || 
+                originalFilename.endsWith(".csv"))) {
                 event.preventDefault();
                 const fullDownloadUrl = window.location.origin + href;
 
@@ -251,7 +290,7 @@
                         if (!response.ok) throw new Error("Network response was not ok");
                         return response.text().then(content => ({
                             content,
-                            originalFilename
+                            originalFilename,
                         }));
                     })
                     .then(({ content, originalFilename }) => {
@@ -261,5 +300,4 @@
             }
         }
     });
-
 })();
